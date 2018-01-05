@@ -1,0 +1,3 @@
+[submodule "objectstoragesharp"]
+	path = objectstoragesharp
+	url = https://github.com/laicos0/objectstoragesharp.git
