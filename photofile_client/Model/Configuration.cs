@@ -5,11 +5,38 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace photofile_client.Model {
+    [Serializable]
     class Configuration {
-        public string KeyStoneUrl { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        /// <summary>
+        /// 写真の保存先
+        /// </summary>
         public string PhotoDir { get; set; }
-        public string LocalContentsDir { get; set; }
+        /// <summary>
+        /// 出力先
+        /// </summary>
+        public string ExportDir { get; set; } = "dist";
+        /// <summary>
+        /// dist/imagesに写真を配置する
+        /// </summary>
+        public string GenerateImagedir { get; set; } = "images";
+        /// <summary>
+        /// サムネイル画像の配置先
+        /// </summary>
+        public string SmallImageDir { get; set; } = "s";
+        /// <summary>
+        /// Web閲覧画像の配置先
+        /// </summary>
+        public string MediumImageDir { get; set; } = "m";
+        /// <summary>
+        /// オリジナルファイルの配置先
+        /// </summary>
+        public string RawImageDir { get; set; } = "r";
+
+        public int SmallThumbWidth { get; set; } = 300;
+        public int SmallThumbHeight { get; set; } = 300;
+        public int MediumThumbWidth { get; set; } = 1366;
+        public int MediumThumbHeight { get; set; } = 768;
+        public bool IsHoldAspectRatio { get; set; } = true;
+
     }
 }

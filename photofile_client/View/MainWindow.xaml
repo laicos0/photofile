@@ -101,6 +101,13 @@
                             <ComboBox Margin="216,6,10,10"/>
                         </Grid>
                     </GroupBox>
+                    <ListView Margin="10" Grid.Row="1" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Hidden" HorizontalContentAlignment="Stretch">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </Grid>
             </GroupBox>
         </Grid>
