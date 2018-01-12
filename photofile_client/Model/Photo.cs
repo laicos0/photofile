@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace photofile_client.Model {
     [Serializable]
-    class Photo {
+    public class Photo {
         #region 保存時に生成
         [JsonProperty(PropertyName = "srcr")]
         public string RawPath { get; set; }
@@ -30,7 +31,11 @@ namespace photofile_client.Model {
         public int MediumThumbWidth { get; set; }
         public int MediumThumbHeight { get; set; }
         public bool IsHoldAspectRatio { get; set; }
-        public string OriginalName { get; set; }
+
+        public string OriginalName => Path.GetFileName(this.FilePath);
+
+        [JsonIgnore]
+        public string FilePath { get; set; }
         #endregion
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace photofile_client.Model {
     [Serializable]
-    class Configuration {
+    public class Configuration {
         /// <summary>
         /// 写真の保存先
         /// </summary>

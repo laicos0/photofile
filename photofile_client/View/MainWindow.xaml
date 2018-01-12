@@ -25,32 +25,32 @@
                 <ColumnDefinition Width="239*"/>
             </Grid.ColumnDefinitions>
             <Label Content="写真の保存先" HorizontalAlignment="Left" Width="80" Grid.Column="1" Margin="10,0,0,0"/>
-            <TextBox Height="23" Margin="95,4,40,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Grid.Column="1"/>
+            <TextBox Height="23" Margin="95,4,40,0" TextWrapping="Wrap" Text="{Binding Config.Value.PhotoDir, Mode=TwoWay}" VerticalAlignment="Top" Grid.Column="1"/>
             <Label Content="ファイル出力先" HorizontalAlignment="Left" Width="80" Grid.Column="2" Margin="1,0,0,0"/>
-            <TextBox Height="23" Margin="86,4,46,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Grid.Column="2"/>
-            <Button Content="..." HorizontalAlignment="Right" Margin="0,3,4,0" VerticalAlignment="Top" Width="31" Height="24" Grid.Column="1"/>
-            <Button Content="..." HorizontalAlignment="Right" Margin="0,4,10,0" VerticalAlignment="Top" Width="31" Height="24" Grid.Column="2"/>
-            <Button Content="写真読み込み" HorizontalAlignment="Left" Margin="10,4,0,0" VerticalAlignment="Top" Width="97" Height="24"/>
-            <Button Content="エクスポート" HorizontalAlignment="Left" Margin="112,4,0,0" VerticalAlignment="Top" Width="97" Height="24"/>
+            <TextBox Height="23" Margin="86,4,46,0" TextWrapping="Wrap" Text="{Binding Config.Value.ExportDir, Mode=TwoWay}" VerticalAlignment="Top" Grid.Column="2"/>
+            <Button Content="..." Command="{Binding SelectPhotoDirCommand}" HorizontalAlignment="Right" Margin="0,3,4,0" VerticalAlignment="Top" Width="31" Height="24" Grid.Column="1"/>
+            <Button Content="..." Command="{Binding SelectExportDirCommand}" HorizontalAlignment="Right" Margin="0,4,10,0" VerticalAlignment="Top" Width="31" Height="24" Grid.Column="2"/>
+            <Button Content="写真読み込み" Command="{Binding ReadPhotoCommand}" HorizontalAlignment="Left" Margin="10,4,0,0" VerticalAlignment="Top" Width="97" Height="24"/>
+            <Button Content="エクスポート" Command="{Binding ExportCommand}" HorizontalAlignment="Left" Margin="112,4,0,0" VerticalAlignment="Top" Width="97" Height="24"/>
         </Grid>
         <Grid Grid.Row="3" Background="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
-            <Label Content="Label" Margin="0" VerticalAlignment="Top"/>
+            <Label Content="{Binding LogText.Value}" Margin="0" VerticalAlignment="Top"/>
         </Grid>
         <Grid Grid.Row="1" Grid.RowSpan="1" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
             <Label Content="サムネイル小" HorizontalAlignment="Left" Width="72" Margin="2,0,0,0"/>
-            <TextBox Height="23" Margin="79,3,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
+            <TextBox Height="23" Margin="79,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.SmallThumbWidth, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
             <Label Content="x" HorizontalAlignment="Left" Width="20" Margin="142,0,0,0"/>
-            <CheckBox Content="横幅に応じてアスペクト比を保持" HorizontalAlignment="Right" Margin="0,6,10,0" VerticalAlignment="Top"/>
-            <TextBox Height="23" Margin="156,3,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
+            <CheckBox Content="横幅に応じてアスペクト比を保持" HorizontalAlignment="Left" Margin="459,6,0,0" VerticalAlignment="Top" IsChecked="{Binding Config.Value.IsHoldAspectRatio,Mode=TwoWay}"/>
+            <TextBox Height="23" Margin="156,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.SmallThumbHeight, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
             <Label Content="サムネイル中" HorizontalAlignment="Left" Width="72" Margin="237,0,0,0"/>
-            <TextBox Height="23" Margin="314,3,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
+            <TextBox Height="23" Margin="314,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.MediumThumbWidth, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
             <Label Content="x" HorizontalAlignment="Left" Width="20" Margin="377,0,0,0"/>
-            <TextBox Height="23" Margin="391,3,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
+            <TextBox Height="23" Margin="391,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.MediumThumbHeight, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
         </Grid>
         <Grid Grid.Row="2" Grid.RowSpan="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="455*"/>
-                <ColumnDefinition Width="263*"/>
+                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
@@ -60,31 +60,34 @@
                 <GroupBox Header="写真情報" Margin="10">
                     <Grid>
                         <Label Content="タイトル" HorizontalAlignment="Left" Width="48" Margin="10,10,0,0" Height="27" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="108,14,10,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top"/>
+                        <TextBox Height="23" Margin="108,14,10,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.Title, Mode=TwoWay}" VerticalAlignment="Top"/>
                         <Label Content="サムネイル小" HorizontalAlignment="Left" Width="72" Margin="10,69,0,0" Height="26" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="0,73,87,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
+                        <TextBox Height="23" Margin="0,73,87,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.SmallThumbWidth, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
                         <Label Content="x" HorizontalAlignment="Right" Width="20" Margin="0,69,67,0" Height="26" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="0,73,10,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
+                        <TextBox Height="23" Margin="0,73,10,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.SmallThumbHeight, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
                         <Label Content="サムネイル中" HorizontalAlignment="Left" Width="72" Margin="10,100,0,0" Height="27" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="0,104,87,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
+                        <TextBox Height="23" Margin="0,104,87,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.MediumThumbWidth, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
                         <Label Content="x" HorizontalAlignment="Right" Width="20" Margin="0,100,67,0" Height="27" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="0,104,10,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
-                        <CheckBox Content="横幅に応じてアスペクト比を保持" HorizontalAlignment="Right" Margin="0,132,10,0" VerticalAlignment="Top"/>
+                        <TextBox Height="23" Margin="0,104,10,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.MediumThumbHeight, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Right" Width="63"/>
+                        <CheckBox Content="横幅に応じてアスペクト比を保持" IsChecked="{Binding SelectedPhoto.Value.IsHoldAspectRatio, Mode=TwoWay}" HorizontalAlignment="Right" Margin="0,132,10,0" VerticalAlignment="Top"/>
                         <Label Content="撮影日時" HorizontalAlignment="Left" Width="64" Margin="10,38,0,0" Height="27" VerticalAlignment="Top"/>
-                        <TextBox Height="23" Margin="108,42,10,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top"/>
-                        <Button Content="ファイル名変更" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="77" Height="23"/>
-                        <TextBox Height="23" Margin="10,0,92,10" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Bottom"/>
+                        <TextBox Height="23" Margin="108,42,10,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.CreateAt, Mode=TwoWay}" VerticalAlignment="Top"/>
+                        <Button Content="ファイル名変更" Command="{Binding ChangeFileNameCommand}" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="77" Height="23"/>
+                        <TextBox Height="23" Margin="10,0,92,10" TextWrapping="Wrap" Text="{Binding ChangeFileName.Value}" VerticalAlignment="Bottom"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="タグ" Margin="10" Grid.Row="1">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="40"/>
+                            <RowDefinition Height="70"/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <TextBox Height="23" Margin="10,10,57,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top"/>
-                        <Button Content="追加" HorizontalAlignment="Right" Margin="0,10,10,0" VerticalAlignment="Top" Width="42" Height="23"/>
-                        <ListBox Margin="10" Grid.Row="1"/>
+                        <TextBox Height="23" Margin="63,10,57,0" TextWrapping="Wrap" Text="{Binding NewTagName.Value, Mode=TwoWay}" VerticalAlignment="Top"/>
+                        <Button Content="追加" Command="{Binding AddTagCommand}" HorizontalAlignment="Right" Margin="0,10,10,10" Width="42"/>
+                        <ListBox Margin="10" Grid.Row="1" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTags, Mode=TwoWay}" SelectionMode="Multiple"/>
+                        <TextBox Height="23" Margin="62,38,57,0" TextWrapping="Wrap" Text="{Binding NewTagDescription, Mode=TwoWay}" VerticalAlignment="Top"/>
+                        <Label Content="タグ名" HorizontalAlignment="Left" Width="48" Margin="10,10,0,0" Height="27" VerticalAlignment="Top"/>
+                        <Label Content="説明" HorizontalAlignment="Left" Width="48" Margin="9,34,0,0" Height="27" VerticalAlignment="Top"/>
                     </Grid>
                 </GroupBox>
             </Grid>
@@ -101,13 +104,13 @@
                     </Grid.RowDefinitions>
                     <GroupBox Header="タグフィルタ" Margin="10" Grid.ColumnSpan="3">
                         <Grid>
-                            <RadioButton Content="すべて表示" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
-                            <RadioButton Content="タグ無し" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="87,10,0,0"/>
-                            <RadioButton Content="タグ指定" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="150,10,0,0"/>
-                            <ComboBox Margin="216,6,10,10"/>
+                            <RadioButton Content="すべて表示" IsChecked="{Binding TagFilterAll.Value, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
+                            <RadioButton Content="タグ無し" IsChecked="{Binding TagFilterNone.Value, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="87,10,0,0"/>
+                            <RadioButton Content="タグ指定" IsChecked="{Binding TagFilterTag.Value, Mode=TwoWay}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="150,10,0,0"/>
+                            <ComboBox Margin="216,6,10,10" ItemsSource="{Binding Tags}" SelectedItem="{Binding TagFilterSelectedTag.Value, Mode=TwoWay}"/>
                         </Grid>
                     </GroupBox>
-                    <ListView Margin="10,10,10,39" Grid.Row="1" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="3">
+                    <ListView ItemsSource="{Binding Photos}" SelectedItem="{Binding SelectedPhotos, Mode=TwoWay}" Margin="10,10,10,39" Grid.Row="1" SelectionMode="Multiple" ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="3">
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
@@ -123,24 +126,18 @@
                                 </ei:FluidMoveBehavior.EaseX>
                             </ei:FluidMoveBehavior>
                         </i:Interaction.Behaviors>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
-                        <Rectangle Margin="10" Width="100" Height="100" Fill="Black"/>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="{Binding Value, ElementName=slider}" Height="{Binding Value, ElementName=slider}">
+                                    <Image Source="{Binding FilePath}"></Image>
+                                    <TextBlock Text="{Binding Title}"></TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
                     </ListView>
-                    <Slider Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom" Minimum="100" Maximum="2000" LargeChange="200" SmallChange="100" TickFrequency="100" TickPlacement="BottomRight"/>
-                    <Button Content="すべて選択" Grid.Column="1" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
-                    <Button Content="選択解除" Grid.Column="2" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
+                    <Slider x:Name="slider" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom" Minimum="100" Maximum="2000" LargeChange="200" SmallChange="100" TickFrequency="100" TickPlacement="BottomRight" Value="{Binding PreviewSize.Value, Mode=TwoWay}"/>
+                    <Button Content="すべて選択" Command="{Binding PhotoSelectAllCommand}" Grid.Column="1" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
+                    <Button Content="選択解除" Command="{Binding PhotoUnSelectAllCommand}" Grid.Column="2" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
                 </Grid>
             </GroupBox>
         </Grid>
