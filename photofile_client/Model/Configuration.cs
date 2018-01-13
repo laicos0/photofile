@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 namespace photofile_client.Model {
     [Serializable]
     public class Configuration {
+        #region 設定全般
         /// <summary>
         /// 写真の保存先
         /// </summary>
-        public string PhotoDir { get; set; }
+        public string PhotoDir { get; set; } = "";
         /// <summary>
         /// 出力先
         /// </summary>
@@ -37,6 +38,11 @@ namespace photofile_client.Model {
         public int MediumThumbWidth { get; set; } = 1366;
         public int MediumThumbHeight { get; set; } = 768;
         public bool IsHoldAspectRatio { get; set; } = true;
+        #endregion
 
+        #region エクスポートしてた前のデータ
+        public Photo[] Photos { get; set; } = new Photo[] { };
+        public Tag[] Tags { get; set; } = new Tag[] { };
+        #endregion
     }
 }

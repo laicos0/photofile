@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,11 +18,10 @@ namespace photofile_client.ViewModel {
         public ReactiveCollection<Photo> Photos { get; private set; } = new ReactiveCollection<Photo>();
         public ReactiveCollection<Photo> SelectedPhotos { get; set; }
 
-        public ReactiveCollection<string> Tags { get; private set; } = new ReactiveCollection<string>();
+        public ReactiveCollection<Tag> Tags { get; private set; } = new ReactiveCollection<Tag>();
         #endregion
 
         #region UI
-        public ReactiveProperty<double> PreviewSize { get; set; } = new ReactiveProperty<double>(200);
         public ReactiveProperty<bool> TagFilterAll { get; set; } = new ReactiveProperty<bool>(true);
         public ReactiveProperty<bool> TagFilterNone { get; set; } = new ReactiveProperty<bool>(false);
         public ReactiveProperty<bool> TagFilterTag { get; set; } = new ReactiveProperty<bool>(false);
@@ -51,7 +51,57 @@ namespace photofile_client.ViewModel {
         public MainViewModel() {
             this.ConfigPath.Value = "config.json";
             LoadConfiguration();
+
+            SelectPhotoDirCommand = new ReactiveCommand();
+            SelectPhotoDirCommand.Subscribe(() => SelectDirectory(path => {
+                Config.Value.PhotoDir = path;
+                Config.ForceNotify();
+            }));
+            SelectExportDirCommand = new ReactiveCommand();
+            SelectExportDirCommand.Subscribe(() => SelectDirectory(path => {
+                Config.Value.ExportDir = path;
+                Config.ForceNotify();
+            }));
+            ReadPhotoCommand = new ReactiveCommand();
+            ReadPhotoCommand.Subscribe(() => {
+                //一覧の取得
+                var photo = Directory.GetFiles(Config.Value.PhotoDir)
+                                     .Where(x => x.IndexOf(".jpg") > -1)
+                                     .Select(x => new Photo(Config.Value, x))
+                                     .Select(x => 
+                                         //前回の画像データにあれば置換
+                                         Config.Value
+                                               .Photos
+                                               .FirstOrDefault(p => 
+                                                    p.OriginalName.Equals(x.OriginalName)
+                                               ) ?? x
+                                     )
+                                     .ToArray();
+                if (photo.Length == 0) {
+                    Log("ファイルが見つかりませんでした。");
+                    return;
+                }
+                //タグ
+                var tags = Config.Value.Tags;
+                //反映
+                Photos.Clear();
+                Tags.Clear();
+                Photos.AddRangeOnScheduler(photo);
+                Tags.AddRangeOnScheduler(tags);
+                Log($"{photo.Length}枚の画像と{tags.Length}個のタグを読み込み");
+            });
         }
+
+        private void SelectDirectory(Action<string> f) {
+            //TODO:本当はVMに持たせたくない
+            var dialog = new System.Windows.Forms.FolderBrowserDialog() {
+                Description = "写真が保存されているディレクトリを選択",
+            };
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
+                f(dialog.SelectedPath);
+            }
+        }
+
         /// <summary>
         /// ステータスバーに表示
         /// </summary>

@@ -128,14 +128,13 @@
                         </i:Interaction.Behaviors>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Width="{Binding Value, ElementName=slider}" Height="{Binding Value, ElementName=slider}">
-                                    <Image Source="{Binding FilePath}"></Image>
-                                    <TextBlock Text="{Binding Title}"></TextBlock>
+                                <Grid Width="300" Height="200">
+                                    <Image Source="{Binding OriginalPath}"></Image>
+                                    <TextBlock Text="{Binding OriginalName}"></TextBlock>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-                    <Slider x:Name="slider" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom" Minimum="100" Maximum="2000" LargeChange="200" SmallChange="100" TickFrequency="100" TickPlacement="BottomRight" Value="{Binding PreviewSize.Value, Mode=TwoWay}"/>
                     <Button Content="すべて選択" Command="{Binding PhotoSelectAllCommand}" Grid.Column="1" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
                     <Button Content="選択解除" Command="{Binding PhotoUnSelectAllCommand}" Grid.Column="2" Margin="10,0,10,7" Grid.Row="1" VerticalAlignment="Bottom"/>
                 </Grid>
