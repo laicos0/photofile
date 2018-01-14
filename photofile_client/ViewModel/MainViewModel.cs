@@ -33,6 +33,8 @@ namespace photofile_client.ViewModel {
         public ReactiveProperty<string> NewTagDescription { get; set; } = new ReactiveProperty<string>();
 
         public ReactiveCollection<string> SelectedTags { get; set; } = new ReactiveCollection<string>();
+
+        public ReactiveProperty<bool> IsPhotoUIEnable { get; set; } = new ReactiveProperty<bool>(false);
         #endregion
 
         #region Commands
@@ -63,34 +65,54 @@ namespace photofile_client.ViewModel {
                 Config.ForceNotify();
             }));
             ReadPhotoCommand = new ReactiveCommand();
-            ReadPhotoCommand.Subscribe(() => {
-                //一覧の取得
-                var photo = Directory.GetFiles(Config.Value.PhotoDir)
-                                     .Where(x => x.IndexOf(".jpg") > -1)
-                                     .Select(x => new Photo(Config.Value, x))
-                                     .Select(x => 
-                                         //前回の画像データにあれば置換
-                                         Config.Value
-                                               .Photos
-                                               .FirstOrDefault(p => 
-                                                    p.OriginalName.Equals(x.OriginalName)
-                                               ) ?? x
-                                     )
-                                     .ToArray();
-                if (photo.Length == 0) {
-                    Log("ファイルが見つかりませんでした。");
-                    return;
-                }
-                //タグ
-                var tags = Config.Value.Tags;
+            ReadPhotoCommand.Subscribe(async () => {
+                IsPhotoUIEnable.Value = false;
+
+                var photos = await LoadPhotos(new Progress<string>(msg => Log(msg)));
                 //反映
                 Photos.Clear();
                 Tags.Clear();
-                Photos.AddRangeOnScheduler(photo);
-                Tags.AddRangeOnScheduler(tags);
-                Log($"{photo.Length}枚の画像と{tags.Length}個のタグを読み込み");
+                Photos.AddRangeOnScheduler(photos);
+                Tags.AddRangeOnScheduler(Config.Value.Tags);
+
+                IsPhotoUIEnable.Value = true;
+                Log($"{photos.Length}枚の画像を読み込み。プレビュー画像が古い場合、{Config.Value.PreviewTempPath}を削除してから再度実行してください。");
             });
         }
+
+        private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
+            //一覧の取得
+            var photos = Directory.GetFiles(Config.Value.PhotoDir)
+                                 .Where(x => x.IndexOf(".jpg") > -1)
+                                 .Select(x => new Photo(Config.Value, x))
+                                 .Select(x =>
+                                     //前回の画像データにあれば置換
+                                     Config.Value
+                                           .Photos
+                                           .FirstOrDefault(p =>
+                                                p.OriginalName.Equals(x.OriginalName)
+                                           ) ?? x
+                                 )
+                                 .ToArray();
+            if (photos.Length == 0) {
+                progress?.Report("ファイルが見つかりませんでした。");
+                return new Photo[] { };
+            }
+            //タグ
+            var tags = Config.Value.Tags;
+            //プレビュー生成
+            if (Directory.Exists(Config.Value.PreviewTempPath)) {
+                Directory.Delete(Config.Value.PreviewTempPath, true);
+            }
+            int i = 0;
+            foreach (var p in photos) {
+                progress?.Report($"プレビュー画像の生成中 ({++i}/{photos.Length}) {p.OriginalName}");
+                if (!File.Exists(p.PreviewPath)) {
+                    p.GeneratePreviewImage();
+                }
+            }
+            return photos;
+        });
 
         private void SelectDirectory(Action<string> f) {
             //TODO:本当はVMに持たせたくない
@@ -117,6 +139,10 @@ namespace photofile_client.ViewModel {
                 try {
                     var jsonText = File.ReadAllText(this.ConfigPath.Value);
                     this.Config.Value = JsonConvert.DeserializeObject<Configuration>(jsonText);
+                    //Configに保存されている画像にConfig参照をつけておく
+                    foreach (var p in this.Config.Value.Photos) {
+                        p.Config = this.Config.Value;
+                    }
                     Log("設定データを読み込み完了");
                 } catch (Exception ex) {
                     Log(ex.Message);

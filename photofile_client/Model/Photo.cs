@@ -1,14 +1,35 @@
-﻿using Newtonsoft.Json;
+﻿using ImageProcessor;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace photofile_client.Model {
     [Serializable]
     public class Photo {
+        #region 実行中のみ
+        /// <summary>
+        /// 設定一式
+        /// </summary>
+        [JsonIgnore]
+        public Configuration Config { get; set; }
+        /// <summary>
+        /// 元画像へのパス
+        /// </summary>
+        [JsonIgnore]
+        public string OriginalPath => Path.GetFullPath($"{Config.PhotoDir}/{OriginalName}");
+        /// <summary>
+        /// UIプレビュー用の一次画像
+        /// </summary>
+        [JsonIgnore]
+        public string PreviewPath => Path.GetFullPath($"{Config.PreviewTempPath}/{OriginalName}");
+
+        #endregion
+
         #region 保存時に生成
         [JsonProperty(PropertyName = "srcr")]
         public string RawPath { get; set; }
@@ -32,42 +53,60 @@ namespace photofile_client.Model {
         public int SmallThumbHeight { get; set; }
         public int MediumThumbWidth { get; set; }
         public int MediumThumbHeight { get; set; }
-        public bool IsHoldAspectRatio { get; set; }
+        public bool IsKeepAspectRatio { get; set; }
 
-        [JsonIgnore]
-        public string OriginalPath { get; set; }
         public string OriginalName { get; set; }
-
         #endregion
 
+
         public Photo() { }
+
+        /// <summary>
+        /// 新規読み込み
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="originPath"></param>
         public Photo(Configuration config, string originPath) {
-            OriginalPath = originPath;
-            OriginalName = Path.GetFileName(OriginalPath);
+            Config = config;
+
+            OriginalName = Path.GetFileName(originPath);
 
             SmallThumbWidth = config.SmallThumbWidth;
             SmallThumbHeight = config.SmallThumbHeight;
             MediumThumbWidth = config.MediumThumbWidth;
             MediumThumbHeight = config.MediumThumbHeight;
-            IsHoldAspectRatio = config.IsHoldAspectRatio;
+            IsKeepAspectRatio = config.IsKeepAspectRatio;
+        }
+        /// <summary>
+        /// UIプレビュー用の画像を生成します
+        /// </summary>
+        public void GeneratePreviewImage() {
+            Directory.CreateDirectory(Config.PreviewTempPath);
+            using (var f = new ImageFactory()) {
+                f.Load(OriginalPath);
+                var aspect = f.Image.Height / (double)f.Image.Width;
+                var width = Config.PreviewWidth;
+                var height = Config.IsKeepAspectRatio ?
+                    (width * aspect) : Config.PreviewHeight;
+                f.Resize(new System.Drawing.Size(width, (int)height))
+                 .Save(PreviewPath);
+            }
         }
         /// <summary>
         /// ファイルパス情報を更新します
         /// </summary>
-        /// <param name="config"></param>
-        public void UpdatePath(Configuration config) {
-            var basePath = $"{config.ExportDir}/{config.GenerateImagedir}";
-            RawPath = $"{basePath}/{config.RawImageDir}/{OriginalName}";
-            MediumThumbPath = $"{basePath}/{config.MediumImageDir}/{OriginalName}";
-            SmallThumbPath = $"{basePath}/{config.SmallImageDir}/{OriginalName}";
+        public void UpdatePath() {
+            var basePath = $"{Config.ExportDir}/{Config.GenerateImagedir}";
+            RawPath = $"{basePath}/{Config.RawImageDir}/{OriginalName}";
+            MediumThumbPath = $"{basePath}/{Config.MediumImageDir}/{OriginalName}";
+            SmallThumbPath = $"{basePath}/{Config.SmallImageDir}/{OriginalName}";
         }
         /// <summary>
         /// 画像を生成します
         /// </summary>
-        /// <param name="config"></param>
-        public void GenerateImage(Configuration config) {
+        public void GenerateImage() {
             //事前にパスを新しくしておく
-            UpdatePath(config);
+            UpdatePath();
             //リサイズした画像を生成する
             //一番多い色を取得
             throw new NotImplementedException();

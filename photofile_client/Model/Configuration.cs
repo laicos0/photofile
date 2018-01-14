@@ -11,7 +11,7 @@ namespace photofile_client.Model {
         /// <summary>
         /// 写真の保存先
         /// </summary>
-        public string PhotoDir { get; set; } = "";
+        public string PhotoDir { get; set; } = ".";
         /// <summary>
         /// 出力先
         /// </summary>
@@ -37,7 +37,14 @@ namespace photofile_client.Model {
         public int SmallThumbHeight { get; set; } = 300;
         public int MediumThumbWidth { get; set; } = 1366;
         public int MediumThumbHeight { get; set; } = 768;
-        public bool IsHoldAspectRatio { get; set; } = true;
+        public bool IsKeepAspectRatio { get; set; } = true;
+        #endregion
+
+        #region 操作関連
+        public string PreviewTempPath { get; set; } = "preview_tmp";
+        public int PreviewWidth { get; set; } = 300;
+        public int PreviewHeight { get; set; } = 200;
+        public bool IsPreviewKeepAspectRatio { get; set; } = true;
         #endregion
 
         #region エクスポートしてた前のデータ
