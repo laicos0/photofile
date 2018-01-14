@@ -100,10 +100,7 @@ namespace photofile_client.ViewModel {
             }
             //タグ
             var tags = Config.Value.Tags;
-            //プレビュー生成
-            if (Directory.Exists(Config.Value.PreviewTempPath)) {
-                Directory.Delete(Config.Value.PreviewTempPath, true);
-            }
+            //プレビュー
             int i = 0;
             foreach (var p in photos) {
                 progress?.Report($"プレビュー画像の生成中 ({++i}/{photos.Length}) {p.OriginalName}");

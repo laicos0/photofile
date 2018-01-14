@@ -41,7 +41,7 @@ namespace photofile_client.Model {
         #endregion
 
         #region 操作関連
-        public string PreviewTempPath { get; set; } = "preview_tmp";
+        public string PreviewTempPath { get; set; } = "tmp";
         public int PreviewWidth { get; set; } = 300;
         public int PreviewHeight { get; set; } = 200;
         public bool IsPreviewKeepAspectRatio { get; set; } = true;
