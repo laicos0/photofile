@@ -1,5 +1,5 @@
-﻿using ImageProcessor;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -82,14 +82,15 @@ namespace photofile_client.Model {
         /// </summary>
         public void GeneratePreviewImage() {
             Directory.CreateDirectory(Config.PreviewTempPath);
-            using (var f = new ImageFactory()) {
-                f.Load(OriginalPath);
-                var aspect = f.Image.Height / (double)f.Image.Width;
+            using (var src = new Mat(OriginalPath)) {
+                var aspect = src.Rows / (double)src.Cols;
                 var width = Config.PreviewWidth;
                 var height = Config.IsKeepAspectRatio ?
                     (width * aspect) : Config.PreviewHeight;
-                f.Resize(new System.Drawing.Size(width, (int)height))
-                 .Save(PreviewPath);
+                using (Mat dst = new Mat((int)height, width, src.Type())) {
+                    Cv2.Resize(src, dst, dst.Size());
+                    dst.SaveImage(PreviewPath);
+                }
             }
         }
         /// <summary>

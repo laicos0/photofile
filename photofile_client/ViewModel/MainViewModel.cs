@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace photofile_client.ViewModel {
@@ -82,8 +83,9 @@ namespace photofile_client.ViewModel {
 
         private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
             //一覧の取得
+            var regex = new Regex(@"\.(jpg|JPG|jpeg|JPEG)$");
             var photos = Directory.GetFiles(Config.Value.PhotoDir)
-                                 .Where(x => x.IndexOf(".jpg") > -1)
+                                 .Where(x => regex.IsMatch(x))
                                  .Select(x => new Photo(Config.Value, x))
                                  .Select(x =>
                                      //前回の画像データにあれば置換
