@@ -17,7 +17,7 @@ namespace photofile_client.ViewModel {
         public ReactiveProperty<string> LogText { get; private set; } = new ReactiveProperty<string>("Ready.");
         public ReactiveProperty<Configuration> Config { get; private set; } = new ReactiveProperty<Configuration>();
         public ReactiveCollection<Photo> Photos { get; private set; } = new ReactiveCollection<Photo>();
-        public ReactiveCollection<Photo> SelectedPhotos { get; set; }
+        public ReactiveProperty<Photo> SelectedPhoto { get; set; } = new ReactiveProperty<Photo>();
 
         public ReactiveCollection<Tag> Tags { get; private set; } = new ReactiveCollection<Tag>();
         #endregion
@@ -36,6 +36,7 @@ namespace photofile_client.ViewModel {
         public ReactiveCollection<string> SelectedTags { get; set; } = new ReactiveCollection<string>();
 
         public ReactiveProperty<bool> IsPhotoUIEnable { get; set; } = new ReactiveProperty<bool>(false);
+
         #endregion
 
         #region Commands
@@ -54,7 +55,13 @@ namespace photofile_client.ViewModel {
         public MainViewModel() {
             this.ConfigPath.Value = "config.json";
             LoadConfiguration();
-
+            PhotoInitialize();
+            SelectedPhoto.Subscribe(x => Console.WriteLine(x));
+        }
+        /// <summary>
+        /// 写真読み込み家の初期化
+        /// </summary>
+        private void PhotoInitialize() {
             SelectPhotoDirCommand = new ReactiveCommand();
             SelectPhotoDirCommand.Subscribe(() => SelectDirectory(path => {
                 Config.Value.PhotoDir = path;
@@ -83,7 +90,7 @@ namespace photofile_client.ViewModel {
 
         private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
             //一覧の取得
-            var regex = new Regex(@"\.(jpg|JPG|jpeg|JPEG)$");
+            var regex = new Regex(@"\.(jpg|jpeg)$", RegexOptions.IgnoreCase);
             var photos = Directory.GetFiles(Config.Value.PhotoDir)
                                  .Where(x => regex.IsMatch(x))
                                  .Select(x => new Photo(Config.Value, x))

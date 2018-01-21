@@ -31,7 +31,7 @@ namespace photofile_client.Model {
         #endregion
 
         #region 保存時に生成
-        [JsonProperty(PropertyName = "srcr")]
+        [JsonProperty(PropertyName = "downloadURL")]
         public string RawPath { get; set; }
         [JsonProperty(PropertyName = "src")]
         public string MediumThumbPath { get; set; }
@@ -44,18 +44,27 @@ namespace photofile_client.Model {
         #region ユーザーが設定
         [JsonProperty(PropertyName = "title")]
         public string Title { get; set; } = "";
+        [JsonProperty(PropertyName = "description")]
+        public string Description { get; set; } = "";
         [JsonProperty(PropertyName = "create_at")]
         public DateTime CreateAt { get; set; } = DateTime.Now;
         [JsonProperty(PropertyName = "tags")]
         public string[] Tags { get; set; } = new string[] { };
 
+        [JsonProperty(PropertyName = "imgtWidth")]
         public int SmallThumbWidth { get; set; }
+        [JsonProperty(PropertyName = "imgtHeight")]
         public int SmallThumbHeight { get; set; }
+        [JsonProperty(PropertyName = "width")]
         public int MediumThumbWidth { get; set; }
+        [JsonProperty(PropertyName = "height")]
         public int MediumThumbHeight { get; set; }
+
         public bool IsKeepAspectRatio { get; set; }
 
         public string OriginalName { get; set; }
+        [JsonProperty(PropertyName = "imageDominantColor")]
+        public string DominantColor { get; set; } = "#000000";
         #endregion
 
 
