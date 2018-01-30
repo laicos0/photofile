@@ -62,6 +62,7 @@ namespace photofile_client.ViewModel {
         /// 写真読み込み家の初期化
         /// </summary>
         private void PhotoInitialize() {
+            #region ファイル読み込み
             SelectPhotoDirCommand = new ReactiveCommand();
             SelectPhotoDirCommand.Subscribe(() => SelectDirectory(path => {
                 Config.Value.PhotoDir = path;
@@ -86,7 +87,9 @@ namespace photofile_client.ViewModel {
                 IsPhotoUIEnable.Value = true;
                 Log($"{photos.Length}枚の画像を読み込み。プレビュー画像が古い場合、{Config.Value.PreviewTempPath}を削除してから再度実行してください。");
             });
+            #endregion
 
+            // フィルタ
             FilteredPhotos =
                 Photos.CollectionChangedAsObservable()
                       .Select(x => Photos.AsEnumerable())
@@ -100,11 +103,25 @@ namespace photofile_client.ViewModel {
                       .SelectMany(x => x)
                       .ToReadOnlyReactiveCollection();
 
+            #region ファイル名変更
             SelectedPhoto.Where(x => x != null)
                          .Subscribe(p => {
-                             this.ChangeFileName.Value = p.OriginalName;
+                             ChangeFileName.Value = p.OriginalName;
                          });
+            ChangeFileNameCommand =
+                ChangeFileName.Select(x => !string.IsNullOrWhiteSpace(x))
+                              .ToReactiveCommand();
+            ChangeFileNameCommand.Subscribe(() => {
+                var oldName = SelectedPhoto.Value.OriginalName;
+                var newName = ChangeFileName.Value;
+                var newPath = Path.GetFullPath($"{Config.Value.PhotoDir}/{newName}");
+                File.Move(SelectedPhoto.Value.OriginalPath, newPath);
+                SelectedPhoto.Value.OriginalName = newName;
+                Log($"ファイル名を変更 {oldName} -> {newName}");
+            });
+            #endregion
 
+            #region Tag
             SelectedTags =
                 SelectedPhoto.Where(x => x != null)
                              .SelectMany(x => x.Tags)
@@ -125,6 +142,7 @@ namespace photofile_client.ViewModel {
                     tag.Description = NewTagDescription.Value;
                 }
             });
+            #endregion
         }
 
         private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
