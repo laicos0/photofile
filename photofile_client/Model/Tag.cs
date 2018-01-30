@@ -9,5 +9,7 @@ namespace photofile_client.Model {
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreateAt { get; set; }
+
+        public override string ToString() => $"[{Name}] {Description}";
     }
 }

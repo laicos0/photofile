@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Reactive.Bindings.Extensions;
 
 namespace photofile_client.ViewModel {
     public class MainViewModel {
@@ -16,7 +17,9 @@ namespace photofile_client.ViewModel {
         public ReactiveProperty<string> ConfigPath { get; set; } = new ReactiveProperty<string>("Ready.");
         public ReactiveProperty<string> LogText { get; private set; } = new ReactiveProperty<string>("Ready.");
         public ReactiveProperty<Configuration> Config { get; private set; } = new ReactiveProperty<Configuration>();
+
         public ReactiveCollection<Photo> Photos { get; private set; } = new ReactiveCollection<Photo>();
+        public ReadOnlyReactiveCollection<Photo> FilteredPhotos { get; private set; }
         public ReactiveProperty<Photo> SelectedPhoto { get; set; } = new ReactiveProperty<Photo>();
 
         public ReactiveCollection<Tag> Tags { get; private set; } = new ReactiveCollection<Tag>();
@@ -44,9 +47,6 @@ namespace photofile_client.ViewModel {
         public ReactiveCommand SelectExportDirCommand { get; private set; }
         public ReactiveCommand ReadPhotoCommand { get; private set; }
         public ReactiveCommand ExportCommand { get; private set; }
-
-        public ReactiveCommand PhotoSelectAllCommand { get; private set; }
-        public ReactiveCommand PhotoUnSelectAllCommand { get; private set; }
 
         public ReactiveCommand ChangeFileNameCommand { get; private set; }
         public ReactiveCommand AddTagCommand { get; private set; }
@@ -85,6 +85,45 @@ namespace photofile_client.ViewModel {
 
                 IsPhotoUIEnable.Value = true;
                 Log($"{photos.Length}枚の画像を読み込み。プレビュー画像が古い場合、{Config.Value.PreviewTempPath}を削除してから再度実行してください。");
+            });
+
+            FilteredPhotos =
+                Photos.CollectionChangedAsObservable()
+                      .Select(x => Photos.AsEnumerable())
+                      .CombineLatest(TagFilterAll, TagFilterNone, TagFilterTag,
+                        (p, isAll, isNone, isTag) => {
+                            if (isAll) return p;
+                            else if (isNone) return p.Where(x => x.Tags.Length == 0);
+                            else if (isTag) return p.Where(x => x.Tags.Any(t => t.Equals(TagFilterSelectedTag.Value)));
+                            else throw new NotImplementedException();
+                        })
+                      .SelectMany(x => x)
+                      .ToReadOnlyReactiveCollection();
+
+            SelectedPhoto.Where(x => x != null)
+                         .Subscribe(p => {
+                             this.ChangeFileName.Value = p.OriginalName;
+                         });
+
+            SelectedTags =
+                SelectedPhoto.Where(x => x != null)
+                             .SelectMany(x => x.Tags)
+                             .ToReactiveCollection();
+            AddTagCommand =
+                NewTagName.Select(x => !string.IsNullOrWhiteSpace(x))
+                          .ToReactiveCommand(false);
+
+            AddTagCommand.Subscribe(() => {
+                var tag = Tags.FirstOrDefault(x => x.Name.Equals(NewTagName.Value));
+                if (tag == null) {
+                    Tags.AddOnScheduler(new Tag() {
+                        CreateAt = DateTime.Now,
+                        Name = NewTagName.Value,
+                        Description = NewTagDescription.Value,
+                    });
+                } else {
+                    tag.Description = NewTagDescription.Value;
+                }
             });
         }
 

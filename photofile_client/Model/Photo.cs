@@ -80,6 +80,7 @@ namespace photofile_client.Model {
 
             OriginalName = Path.GetFileName(originPath);
 
+            Title = OriginalName;
             SmallThumbWidth = config.SmallThumbWidth;
             SmallThumbHeight = config.SmallThumbHeight;
             MediumThumbWidth = config.MediumThumbWidth;
