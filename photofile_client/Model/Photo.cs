@@ -27,7 +27,19 @@ namespace photofile_client.Model {
         /// </summary>
         [JsonIgnore]
         public string PreviewPath => Path.GetFullPath($"{Config.PreviewTempPath}/{OriginalName}");
-
+        /// <summary>
+        /// タグのプレビュー用
+        /// </summary>
+        [JsonIgnore]
+        public string TagText {
+            get {
+                var sb = new StringBuilder();
+                foreach (var t in TagDetails) {
+                    sb.Append($"#{t.Name},");
+                }
+                return sb.ToString();
+            }
+        }
         #endregion
 
         #region 保存時に生成
@@ -49,7 +61,9 @@ namespace photofile_client.Model {
         [JsonProperty(PropertyName = "create_at")]
         public DateTime CreateAt { get; set; } = DateTime.Now;
         [JsonProperty(PropertyName = "tags")]
-        public string[] Tags { get; set; } = new string[] { };
+        public string[] Tags => TagDetails.Select(x => x.Name).ToArray();
+        [JsonProperty(PropertyName = "tagDetails")]
+        public Tag[] TagDetails { get; set; } = new Tag[] { };
 
         [JsonProperty(PropertyName = "imgtWidth")]
         public int SmallThumbWidth { get; set; }

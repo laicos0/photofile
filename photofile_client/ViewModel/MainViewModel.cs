@@ -36,7 +36,7 @@ namespace photofile_client.ViewModel {
         public ReactiveProperty<string> NewTagName { get; set; } = new ReactiveProperty<string>();
         public ReactiveProperty<string> NewTagDescription { get; set; } = new ReactiveProperty<string>();
 
-        public ReactiveCollection<string> SelectedTags { get; set; } = new ReactiveCollection<string>();
+        public ReactiveProperty<Tag> SelectedTag { get; set; } = new ReactiveProperty<Tag>();
 
         public ReactiveProperty<bool> IsPhotoUIEnable { get; set; } = new ReactiveProperty<bool>(false);
 
@@ -48,8 +48,10 @@ namespace photofile_client.ViewModel {
         public ReactiveCommand ReadPhotoCommand { get; private set; }
         public ReactiveCommand ExportCommand { get; private set; }
 
+
         public ReactiveCommand ChangeFileNameCommand { get; private set; }
         public ReactiveCommand AddTagCommand { get; private set; }
+        public ReactiveCommand<Tag> ToggleTagCommand { get; set; }
         #endregion
 
         public MainViewModel() {
@@ -96,8 +98,8 @@ namespace photofile_client.ViewModel {
                       .CombineLatest(TagFilterAll, TagFilterNone, TagFilterTag,
                         (p, isAll, isNone, isTag) => {
                             if (isAll) return p;
-                            else if (isNone) return p.Where(x => x.Tags.Length == 0);
-                            else if (isTag) return p.Where(x => x.Tags.Any(t => t.Equals(TagFilterSelectedTag.Value)));
+                            else if (isNone) return p.Where(x => x.TagDetails.Length == 0);
+                            else if (isTag) return p.Where(x => x.TagDetails.Any(t => t.Equals(TagFilterSelectedTag.Value)));
                             else throw new NotImplementedException();
                         })
                       .SelectMany(x => x)
@@ -122,10 +124,6 @@ namespace photofile_client.ViewModel {
             #endregion
 
             #region Tag
-            SelectedTags =
-                SelectedPhoto.Where(x => x != null)
-                             .SelectMany(x => x.Tags)
-                             .ToReactiveCollection();
             AddTagCommand =
                 NewTagName.Select(x => !string.IsNullOrWhiteSpace(x))
                           .ToReactiveCommand(false);
@@ -141,6 +139,21 @@ namespace photofile_client.ViewModel {
                 } else {
                     tag.Description = NewTagDescription.Value;
                 }
+            });
+            ToggleTagCommand =
+                SelectedPhoto.Select(x => x != null)
+                             .ToReactiveCommand<Tag>(false);
+            //タグがある場合は削除、なければ追加
+            ToggleTagCommand.Subscribe(t => {
+                var tagList = SelectedPhoto.Value.TagDetails.ToList();
+                var target = tagList.FirstOrDefault(x => x.Name.Equals(t.Name));
+                if (target != null) {
+                    tagList.Remove(target);
+                } else {
+                    tagList.Add(t);
+                }
+                SelectedPhoto.Value.TagDetails = tagList.ToArray();
+                SelectedPhoto.ForceNotify();
             });
             #endregion
         }

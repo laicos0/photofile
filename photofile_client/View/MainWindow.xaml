@@ -55,7 +55,7 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="250"/>
+                    <RowDefinition Height="320"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
                 <GroupBox Header="写真情報" Margin="10">
@@ -75,6 +75,8 @@
                         <TextBox Height="23" Margin="108,42,10,0" TextWrapping="Wrap" Text="{Binding SelectedPhoto.Value.CreateAt, Mode=TwoWay}" VerticalAlignment="Top"/>
                         <Button Content="ファイル名変更" Command="{Binding ChangeFileNameCommand}" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom" Width="77" Height="23"/>
                         <TextBox Height="23" Margin="10,0,92,10" TextWrapping="Wrap" Text="{Binding ChangeFileName.Value}" VerticalAlignment="Bottom"/>
+                        <TextBox Margin="100,160,10,38" Text="{ Binding SelectedPhoto.Value.TagText, Mode=OneWay}" IsReadOnly="True"/>
+                        <Label Content="タグ" HorizontalAlignment="Left" Width="72" Margin="10,160,0,0" Height="27" VerticalAlignment="Top"/>
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="タグ" Margin="10" Grid.Row="1">
@@ -88,7 +90,13 @@
                         <TextBox Height="23" Margin="63,10,57,0" TextWrapping="Wrap" Text="{Binding NewTagName.Value, Mode=TwoWay}" VerticalAlignment="Top"/>
                         <TextBox Height="23" Margin="62,38,57,0" TextWrapping="Wrap" Text="{Binding NewTagDescription.Value, Mode=TwoWay}" VerticalAlignment="Top"/>
                         <Button Content="追加" Command="{Binding AddTagCommand}" HorizontalAlignment="Right" Margin="0,10,10,10" Width="42"/>
-                        <ListBox Margin="10" Grid.Row="1" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTags, Mode=TwoWay}" SelectionMode="Multiple"/>
+                        <ListBox Margin="10" Grid.Row="1" ItemsSource="{Binding Tags}" SelectedItem="{Binding SelectedTag.Value}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseDoubleClick">
+                                    <i:InvokeCommandAction Command="{Binding ToggleTagCommand}" CommandParameter="{Binding SelectedTag.Value}"></i:InvokeCommandAction>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </ListBox>
                     </Grid>
                 </GroupBox>
             </Grid>
