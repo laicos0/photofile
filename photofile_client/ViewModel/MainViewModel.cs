@@ -19,7 +19,7 @@ namespace photofile_client.ViewModel {
         public ReactiveProperty<Configuration> Config { get; private set; } = new ReactiveProperty<Configuration>();
 
         public ReactiveCollection<Photo> Photos { get; private set; } = new ReactiveCollection<Photo>();
-        public ReadOnlyReactiveCollection<Photo> FilteredPhotos { get; private set; }
+        public ReactiveCollection<Photo> FilteredPhotos { get; set; } = new ReactiveCollection<Photo>();
         public ReactiveProperty<Photo> SelectedPhoto { get; set; } = new ReactiveProperty<Photo>();
 
         public ReactiveCollection<Tag> Tags { get; private set; } = new ReactiveCollection<Tag>();
@@ -92,19 +92,22 @@ namespace photofile_client.ViewModel {
             #endregion
 
             // フィルタ
-            FilteredPhotos =
-                Photos.CollectionChangedAsObservable()
-                      .Select(x => Photos.AsEnumerable())
-                      .CombineLatest(TagFilterAll, TagFilterNone, TagFilterTag,
-                        (p, isAll, isNone, isTag) => {
-                            if (isAll) return p;
-                            else if (isNone) return p.Where(x => x.TagDetails.Length == 0);
-                            else if (isTag) return p.Where(x => x.TagDetails.Any(t => t.Equals(TagFilterSelectedTag.Value)));
-                            else throw new NotImplementedException();
-                        })
-                      .SelectMany(x => x)
-                      .ToReadOnlyReactiveCollection();
-
+            IsPhotoUIEnable.PropertyChangedAsObservable()
+                           .Select(x => Photos.AsEnumerable())
+                           .CombineLatest(TagFilterAll, TagFilterNone, TagFilterTag, TagFilterSelectedTag,
+                                (p, isAll, isNone, isTag, tagText) => {
+                                    // RadioButtonが2回判定が来る, trueがふたつあるときは無視
+                                    if ((isAll ? 1 : 0)+ (isNone ? 1 : 0) + (isTag ? 1 : 0) > 1) return null;
+                                    if (isAll) return p;
+                                    else if (isNone) return p.Where(x => x.TagDetails.Length == 0);
+                                    else if (isTag) return p.Where(x => x.TagDetails.Any(t => t.ToString().Equals(tagText)));
+                                    else throw new NotImplementedException();
+                            })
+                            .Where(photos => photos != null)
+                            .Subscribe(photos => {
+                                FilteredPhotos.Clear();
+                                FilteredPhotos.AddRangeOnScheduler(photos);
+                            });
             #region ファイル名変更
             SelectedPhoto.Where(x => x != null)
                          .Subscribe(p => {
@@ -155,6 +158,10 @@ namespace photofile_client.ViewModel {
                 SelectedPhoto.Value.TagDetails = tagList.ToArray();
                 SelectedPhoto.ForceNotify();
             });
+            #endregion
+
+            #region Export
+
             #endregion
         }
 

@@ -15,6 +15,6 @@ namespace photofile_client.Model {
         [JsonProperty(PropertyName = "createat")]
         public DateTime CreateAt { get; set; }
 
-        public override string ToString() => $"#{Name} {Description}";
+        public override string ToString() => $"{Name} {Description}";
     }
 }

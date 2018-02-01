@@ -120,27 +120,18 @@
                             <ComboBox Margin="216,6,10,10" ItemsSource="{Binding Tags}" SelectedItem="{Binding TagFilterSelectedTag.Value, Mode=TwoWay}"/>
                         </Grid>
                     </GroupBox>
-                    <ListView ItemsSource="{Binding Photos}" SelectedValue="{Binding SelectedPhoto.Value}" Margin="10" Grid.Row="1" SelectionMode="Single"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="4">
+                    <ListView ItemsSource="{Binding FilteredPhotos}" SelectedValue="{Binding SelectedPhoto.Value}" Margin="10" Grid.Row="1" SelectionMode="Single"  ScrollViewer.HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Grid.ColumnSpan="4">
                         <ListView.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel/>
                             </ItemsPanelTemplate>
                         </ListView.ItemsPanel>
-                        <i:Interaction.Behaviors>
-                            <ei:FluidMoveBehavior AppliesTo="Children">
-                                <ei:FluidMoveBehavior.EaseY>
-                                    <CubicEase EasingMode="EaseInOut"/>
-                                </ei:FluidMoveBehavior.EaseY>
-                                <ei:FluidMoveBehavior.EaseX>
-                                    <CubicEase EasingMode="EaseInOut"/>
-                                </ei:FluidMoveBehavior.EaseX>
-                            </ei:FluidMoveBehavior>
-                        </i:Interaction.Behaviors>
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid Width="300" Height="200">
                                     <Image Source="{Binding PreviewPath}"></Image>
-                                    <TextBlock Text="{Binding OriginalName}"></TextBlock>
+                                    <TextBlock Text="{Binding OriginalName}" FontWeight="Bold" ></TextBlock>
+                                    <TextBlock Text="{Binding TagText}" Height="20" VerticalAlignment="Bottom"/>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
