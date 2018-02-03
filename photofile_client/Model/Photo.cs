@@ -49,8 +49,8 @@ namespace photofile_client.Model {
         public string MediumThumbPath { get; set; }
         [JsonProperty(PropertyName = "srct")]
         public string SmallThumbPath { get; set; }
-        [JsonProperty(PropertyName = "color")]
-        public string PrimaryColor { get; set; }
+        [JsonProperty(PropertyName = "imageDominantColor")]
+        public string DominantColor { get; set; }
         #endregion
 
         #region ユーザーが設定
@@ -77,8 +77,6 @@ namespace photofile_client.Model {
         public bool IsKeepAspectRatio { get; set; }
 
         public string OriginalName { get; set; }
-        [JsonProperty(PropertyName = "imageDominantColor")]
-        public string DominantColor { get; set; } = "#000000";
         #endregion
 
 
@@ -105,23 +103,41 @@ namespace photofile_client.Model {
         /// UIプレビュー用の画像を生成します
         /// </summary>
         public void GeneratePreviewImage() {
+            var srcPath = OriginalPath;
+            var width = Config.PreviewWidth;
+            var originHeight = Config.PreviewHeight;
+            var dstPath = PreviewPath;
+            var isKeepAspect = Config.IsKeepAspectRatio;
+
             Directory.CreateDirectory(Config.PreviewTempPath);
-            using (var src = new Mat(OriginalPath)) {
+            Resize(srcPath, dstPath, width, originHeight, isKeepAspect);
+        }
+
+        /// <summary>
+        /// srcPathに指定された画像をリサイズする
+        /// </summary>
+        /// <param name="srcPath"></param>
+        /// <param name="width"></param>
+        /// <param name="originHeight"></param>
+        /// <param name="dstPath"></param>
+        /// <param name="isKeepAspect"></param>
+        private static void Resize(string srcPath, string dstPath, int width, int originHeight, bool isKeepAspect) {
+            using (var src = new Mat(srcPath)) {
                 var aspect = src.Rows / (double)src.Cols;
-                var width = Config.PreviewWidth;
-                var height = Config.IsKeepAspectRatio ?
-                    (width * aspect) : Config.PreviewHeight;
+                var height = isKeepAspect ?
+                    (width * aspect) : originHeight;
                 using (Mat dst = new Mat((int)height, width, src.Type())) {
                     Cv2.Resize(src, dst, dst.Size());
-                    dst.SaveImage(PreviewPath);
+                    dst.SaveImage(dstPath, new ImageEncodingParam(ImwriteFlags.JpegQuality, 100));
                 }
             }
         }
+
         /// <summary>
         /// ファイルパス情報を更新します
         /// </summary>
         public void UpdatePath() {
-            var basePath = $"{Config.ExportDir}/{Config.GenerateImagedir}";
+            var basePath = $"{Config.ExportDir}/{Config.GenerateImageDir}";
             RawPath = $"{basePath}/{Config.RawImageDir}/{OriginalName}";
             MediumThumbPath = $"{basePath}/{Config.MediumImageDir}/{OriginalName}";
             SmallThumbPath = $"{basePath}/{Config.SmallImageDir}/{OriginalName}";
@@ -133,8 +149,24 @@ namespace photofile_client.Model {
             //事前にパスを新しくしておく
             UpdatePath();
             //リサイズした画像を生成する
+
+            //origin
+            Directory.CreateDirectory($"{Config.ExportDir}/{Config.GenerateImageDir}/{Config.RawImageDir}");
+            File.Copy(OriginalPath, RawPath, true);
+            // medium
+            Directory.CreateDirectory($"{Config.ExportDir}/{Config.GenerateImageDir}/{Config.MediumImageDir}");
+            Resize(OriginalPath, MediumThumbPath, this.MediumThumbWidth, this.MediumThumbHeight, this.IsKeepAspectRatio);
+            // small
+            Directory.CreateDirectory($"{Config.ExportDir}/{Config.GenerateImageDir}/{Config.SmallImageDir}");
+            Resize(OriginalPath, SmallThumbPath, this.SmallThumbWidth, this.SmallThumbHeight, this.IsKeepAspectRatio);
+
             //一番多い色を取得
-            throw new NotImplementedException();
+            using (var src = new Mat(OriginalPath))
+            using (var resized = src.Resize(new Size(1, 1))) {
+                var mean = resized.Mean();
+                DominantColor = $"#{(int)mean[2]:X02}{(int)mean[1]:X02}{(int)mean[0]:X02}";//BGT -> RGB
+
+            }
         }
     }
 }

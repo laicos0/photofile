@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Reactive.Bindings.Extensions;
+using Newtonsoft.Json.Linq;
 
 namespace photofile_client.ViewModel {
     public class MainViewModel {
@@ -97,12 +98,12 @@ namespace photofile_client.ViewModel {
                            .CombineLatest(TagFilterAll, TagFilterNone, TagFilterTag, TagFilterSelectedTag,
                                 (p, isAll, isNone, isTag, tagText) => {
                                     // RadioButtonが2回判定が来る, trueがふたつあるときは無視
-                                    if ((isAll ? 1 : 0)+ (isNone ? 1 : 0) + (isTag ? 1 : 0) > 1) return null;
+                                    if ((isAll ? 1 : 0) + (isNone ? 1 : 0) + (isTag ? 1 : 0) > 1) return null;
                                     if (isAll) return p;
                                     else if (isNone) return p.Where(x => x.TagDetails.Length == 0);
                                     else if (isTag) return p.Where(x => x.TagDetails.Any(t => t.ToString().Equals(tagText)));
                                     else throw new NotImplementedException();
-                            })
+                                })
                             .Where(photos => photos != null)
                             .Subscribe(photos => {
                                 FilteredPhotos.Clear();
@@ -162,14 +163,31 @@ namespace photofile_client.ViewModel {
 
             #region Export
             ExportCommand = IsPhotoUIEnable.ToReactiveCommand();
-            ExportCommand.Subscribe(() => {
+            ExportCommand.Subscribe(async () => {
                 IsPhotoUIEnable.Value = false;
+                // ファイルの削除
+                if (Directory.Exists(Config.Value.ExportDir)) {
+                    Directory.Delete(Config.Value.ExportDir, true);
+                    Log($"{Config.Value.ExportDir}を削除");
+                }
+                // データのエクスポート
+                await ExportPhotos(new Progress<string>(msg => Log(msg)));
+                // Webから参照するデータをエクスポートする
+                var data = new JObject() as dynamic;
+                data.photos = JArray.FromObject(Photos.ToArray());
+                data.tags = JArray.FromObject(Tags.ToArray());
+                data.update = DateTime.Now;
+                var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+                File.WriteAllText($"{Config.Value.ExportDir}/{Config.Value.ExportFileName}", json, Encoding.UTF8);
+                Log($"{Config.Value.ExportFileName}に設定ファイルを出力");
+
                 // 情報のエクスポート
                 Config.Value.Photos = Photos.ToArray();
                 Config.Value.Tags = Tags.ToArray();
                 SaveConfig();
 
                 IsPhotoUIEnable.Value = true;
+                Log("エクスポート完了");
             });
 
             #endregion
@@ -179,6 +197,16 @@ namespace photofile_client.ViewModel {
                 SaveConfig();
             });
         }
+
+        private Task ExportPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
+            var i = 0;
+            var photos = Photos.ToArray();
+            foreach (var p in photos) {
+                p.GenerateImage();
+                progress?.Report($"画像の生成中 ({++i}/{photos.Length})");
+            }
+            return photos;
+        });
 
         private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
             //一覧の取得
