@@ -38,6 +38,8 @@ namespace photofile_client.Model {
         public int MediumThumbWidth { get; set; } = 1366;
         public int MediumThumbHeight { get; set; } = 768;
         public bool IsKeepAspectRatio { get; set; } = true;
+
+        public DateTime UpdateAt { get; set; } = new DateTime();
         #endregion
 
         #region 操作関連

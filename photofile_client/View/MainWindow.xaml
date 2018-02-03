@@ -11,6 +11,11 @@
     <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{ Binding ClosingCommand}"></i:InvokeCommandAction>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -46,7 +51,6 @@
             <TextBox Height="23" Margin="314,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.MediumThumbWidth, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
             <Label Content="x" HorizontalAlignment="Left" Width="20" Margin="377,0,0,0"/>
             <TextBox Height="23" Margin="391,3,0,0" TextWrapping="Wrap" Text="{Binding Config.Value.MediumThumbHeight, Mode=TwoWay}" VerticalAlignment="Top" TextAlignment="Right" HorizontalAlignment="Left" Width="63"/>
-            <TextBlock HorizontalAlignment="Left" Margin="638,8,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="18" Width="183"/>
         </Grid>
         <Grid Grid.Row="2" Grid.RowSpan="1" IsEnabled="{Binding IsPhotoUIEnable.Value}">
             <Grid.ColumnDefinitions>

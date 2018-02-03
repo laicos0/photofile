@@ -52,13 +52,13 @@ namespace photofile_client.ViewModel {
         public ReactiveCommand ChangeFileNameCommand { get; private set; }
         public ReactiveCommand AddTagCommand { get; private set; }
         public ReactiveCommand<Tag> ToggleTagCommand { get; set; }
+        public ReactiveCommand ClosingCommand { get; private set; }
         #endregion
 
         public MainViewModel() {
             this.ConfigPath.Value = "config.json";
             LoadConfiguration();
             PhotoInitialize();
-            SelectedPhoto.Subscribe(x => Console.WriteLine(x));
         }
         /// <summary>
         /// 写真読み込み家の初期化
@@ -161,8 +161,23 @@ namespace photofile_client.ViewModel {
             #endregion
 
             #region Export
+            ExportCommand = IsPhotoUIEnable.ToReactiveCommand();
+            ExportCommand.Subscribe(() => {
+                IsPhotoUIEnable.Value = false;
+                // 情報のエクスポート
+                Config.Value.Photos = Photos.ToArray();
+                Config.Value.Tags = Tags.ToArray();
+                SaveConfig();
+
+                IsPhotoUIEnable.Value = true;
+            });
 
             #endregion
+
+            ClosingCommand = new ReactiveCommand();
+            ClosingCommand.Subscribe(() => {
+                SaveConfig();
+            });
         }
 
         private Task<Photo[]> LoadPhotos(IProgress<string> progress) => Task.Run<Photo[]>(() => {
@@ -226,7 +241,7 @@ namespace photofile_client.ViewModel {
                     foreach (var p in this.Config.Value.Photos) {
                         p.Config = this.Config.Value;
                     }
-                    Log("設定データを読み込み完了");
+                    Log($"設定データを{ConfigPath.Value}から読み込み完了");
                 } catch (Exception ex) {
                     Log(ex.Message);
                 }
@@ -240,7 +255,9 @@ namespace photofile_client.ViewModel {
         /// </summary>
         private void SaveConfig() {
             try {
-                var jsonText = JsonConvert.SerializeObject(this.Config.Value);
+                Config.Value.UpdateAt = DateTime.Now;
+                var jsonText = JsonConvert.SerializeObject(this.Config.Value, Formatting.Indented);
+                File.WriteAllText(ConfigPath.Value, jsonText);
                 Log($"設定データを{this.ConfigPath.Value}に保存");
             } catch (Exception ex) {
                 Log(ex.Message);
