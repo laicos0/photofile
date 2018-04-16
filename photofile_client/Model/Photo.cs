@@ -148,6 +148,7 @@ namespace photofile_client.Model {
         public void GenerateImage() {
             //事前にパスを新しくしておく
             UpdatePath();
+
             //リサイズした画像を生成する
 
             //origin

@@ -11,6 +11,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Reactive.Bindings.Extensions;
 using Newtonsoft.Json.Linq;
+using System.Windows;
+using System.Diagnostics;
 
 namespace photofile_client.ViewModel {
     public class MainViewModel {
@@ -121,8 +123,15 @@ namespace photofile_client.ViewModel {
                 var oldName = SelectedPhoto.Value.OriginalName;
                 var newName = ChangeFileName.Value;
                 var newPath = Path.GetFullPath($"{Config.Value.PhotoDir}/{newName}");
+                if (File.Exists(newPath)) {
+                    Log("すでに存在するファイル名です");
+                    return;
+                }
                 File.Move(SelectedPhoto.Value.OriginalPath, newPath);
                 SelectedPhoto.Value.OriginalName = newName;
+                // サムネが消えるのでリロードする
+                SelectedPhoto.Value.GeneratePreviewImage();
+
                 Log($"ファイル名を変更 {oldName} -> {newName}");
             });
             #endregion
@@ -188,6 +197,8 @@ namespace photofile_client.ViewModel {
 
                 IsPhotoUIEnable.Value = true;
                 Log("エクスポート完了");
+
+                Process.Start(Config.Value.ExportDir);
             });
 
             #endregion
